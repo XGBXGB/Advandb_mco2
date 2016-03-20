@@ -27,7 +27,7 @@ public class DBConnect {
         url = "jdbc:mysql://localhost:3306/";
         database = "advandb_mco2_new";
         username = "root";
-        password = "xgbawesome";//tempo
+        password = "TaylorSwift13";//tempo
     }
      
     /**

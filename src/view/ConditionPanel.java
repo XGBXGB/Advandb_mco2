@@ -20,6 +20,9 @@ public class ConditionPanel extends JPanel implements ActionListener{
 	private ArrayList<String> columns;
 	private ArrayList<String> operators, kit_types;
 
+	private JComboBox condition_calam;
+	private ArrayList<String> calam_types;
+	
 	
 	public ConditionPanel(ConditionParent parent, ArrayList<String> columns){
 		this.columns = columns;
@@ -47,6 +50,20 @@ public class ConditionPanel extends JPanel implements ActionListener{
 		kit_types.add("Tubig");
 		kit_types.add("Iba pang uri");
 		
+		calam_types = new ArrayList<>();
+		calam_types.add("1");
+		calam_types.add("2");
+		calam_types.add("3");
+		calam_types.add("4");
+		calam_types.add("5");
+		calam_types.add("6");
+		calam_types.add("7");
+		calam_types.add("8");
+		calam_types.add("9");
+		calam_types.add("10");
+		calam_types.add("11");
+		
+		
 		this.parent = parent;
 		container = new JPanel();
 		container.setBounds(0, 0, 370, 80);
@@ -57,6 +74,8 @@ public class ConditionPanel extends JPanel implements ActionListener{
 		column = new JComboBox(columns.toArray());
 		condition = new JTextField();
 		operator = new JComboBox(operators.toArray());
+		
+		condition_calam = new JComboBox(calam_types.toArray());
 		
 		close.setBounds(305, 4, 45, 28);
 		close.addActionListener(this);
@@ -71,6 +90,10 @@ public class ConditionPanel extends JPanel implements ActionListener{
 		operator.setBounds(130, 4, 55, 30);
 		condition.setBounds(190, 4, 110, 30);
 		
+		condition_calam.setBounds(190, 4, 110, 30);
+		condition_calam.setVisible(false);
+		
+		container.add(condition_calam);
 		container.add(condition_kit);
 		container.add(column);
 		container.add(operator);
@@ -97,6 +120,7 @@ public class ConditionPanel extends JPanel implements ActionListener{
 	}
 	
 	public String getQueryCondition(){
+		
 		return column.getSelectedItem().toString() +" " 
 				+ operator.getSelectedItem().toString() +" "
 				+ condition.getText();
@@ -104,6 +128,11 @@ public class ConditionPanel extends JPanel implements ActionListener{
 	
 	public String getKitType(){
 		return condition_kit.getSelectedItem().toString();
+	}
+	
+	public int getCalamType()
+	{
+		return Integer.parseInt(condition_calam.getSelectedItem().toString());
 	}
 	
 	public void actionPerformed(ActionEvent e){
@@ -115,10 +144,20 @@ public class ConditionPanel extends JPanel implements ActionListener{
 				condition.setVisible(false);
 				operator.setVisible(false);
 				condition_kit.setVisible(true);
-			}else{
+				condition_calam.setVisible(false);
+			}
+			else if(column.getSelectedItem().toString().equals("calam_id"))
+			{
+				condition.setVisible(false);
+				operator.setVisible(false);
+				condition_kit.setVisible(false);
+				condition_calam.setVisible(true);
+			}
+			else{
 				condition.setVisible(true);
 				operator.setVisible(true);
 				condition_kit.setVisible(false);
+				condition_calam.setVisible(false);
 				this.revalidate();
 				this.repaint();
 			}

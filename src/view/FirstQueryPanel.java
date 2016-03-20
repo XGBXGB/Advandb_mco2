@@ -20,6 +20,7 @@ import javax.swing.border.TitledBorder;
 import model.TableFromMySqlDatabase;
 
 public class FirstQueryPanel extends JPanel implements ConditionParent, ActionListener{
+	private StringBuilder query;
 	private JLabel rollUpDrillDown_lbl, sliceNdice_lbl, table_lbl;
 	private JCheckBox rd_1, rd_2, rd_3, rd_4;
 	private JCheckBox rd_5, rd_6, rd_7, rd_8;
@@ -34,8 +35,14 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 	private TitledBorder sliceNdice_border;
 	private ArrayList<ConditionPanel> conditions;
 	private JTable conditionTable;
+	private ArrayList<String> columns;
 	
 	public FirstQueryPanel(){
+		columns = new ArrayList();
+		columns.add("avg_calam_freq");
+		columns.add("count_calam_aid");
+		columns.add("count_prepared");
+		columns.add("count_households");
 		tfmsd = new TableFromMySqlDatabase();
 		conditions = new ArrayList();
 		UIManager.put("nimbusBase", new Color(0, 153, 204));
@@ -95,21 +102,24 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 		table_lbl.setBounds(270,0,150,20);
 		tableSp.setBounds(10,15, 600,330);
 		rd_1_lbl.setBounds(30, 35, 100, 15);
+		rd_1_lbl.setText("calamity type");
 		rd_2_lbl.setBounds(150, 35, 100, 15);
+		rd_2_lbl.setText("location id");
 		rd_3_lbl.setBounds(30, 65, 100, 15);
-		rd_4_lbl.setBounds(150, 65, 100, 15);
+		rd_3_lbl.setText("area id");
+/*		rd_4_lbl.setBounds(150, 65, 100, 15);
 		rd_5_lbl.setBounds(30, 95, 100, 15);
 		rd_6_lbl.setBounds(150, 95, 100, 15);
 		rd_7_lbl.setBounds(30, 125, 100, 15);
-		rd_8_lbl.setBounds(150, 125, 100, 15);
+		rd_8_lbl.setBounds(150, 125, 100, 15);*/
 		rd_1.setBounds(10, 35, 20, 15);
 		rd_2.setBounds(130, 35, 20, 15);
 		rd_3.setBounds(10, 65, 20, 15);
-		rd_4.setBounds(130, 65, 20, 15);
+/*		rd_4.setBounds(130, 65, 20, 15);
 		rd_5.setBounds(10, 95, 20, 15);
 		rd_6.setBounds(130, 95, 20, 15);
 		rd_7.setBounds(10, 125, 20, 15);
-		rd_8.setBounds(130, 125, 20, 15);
+		rd_8.setBounds(130, 125, 20, 15);*/
 		
 		conditionTable.setDefaultEditor(ConditionPanel.class, new ConditionCellEditor());
 		conditionTable.setDefaultRenderer(ConditionPanel.class, new ConditionCellRenderer());
@@ -121,7 +131,10 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setEnabled(false);
 		condition_btn.addActionListener(this);
-		
+		query_btn.addActionListener(this);
+		rd_1.addActionListener(this);
+		rd_2.addActionListener(this);
+		rd_3.addActionListener(this);
 		
 		rollUpDrillDown_panel.setLayout(null);
 		sliceNdice_panel.setLayout(null);
@@ -155,18 +168,140 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 	}
 	
 	public void actionPerformed(ActionEvent e){
-		ArrayList<String> columns = new ArrayList();
-		columns.add("Wakoko");
-		columns.add("Wakok2");
 		if(e.getSource() == condition_btn){
 			conditions.add(new ConditionPanel(this, columns));
 			conditionTable.setModel(new ConditionTableModel(conditions));
 			conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 			conditionTable.setRowHeight(35);
 		}
-		else if(e.getSource() == query_btn){
-			table.setModel(tfmsd.getResultTable("QUERY GOES HERE"));
+		else if(e.getSource() == rd_1)
+		{
+			updateConditionColumns();
 		}
+		else if(e.getSource() == rd_2)
+		{
+			updateConditionColumns();
+		}
+		else if(e.getSource() == rd_3)
+		{
+			updateConditionColumns();
+		}
+		else if(e.getSource() == query_btn){
+			
+			query = new StringBuilder();
+			String select_stmt = "SELECT ";
+			String from_stmt = " FROM calam_summary_fact C ";
+			String additional_join_cond = "";
+			String group_stmt = "GROUP BY ";
+			String where_stmt = "WHERE ";
+			ArrayList<Integer> calam_types = new ArrayList<Integer>();
+			boolean calam_flag = false;
+			boolean area_flag = false;
+			if(rd_1.isSelected())
+			{
+				select_stmt += "C.calam_id, ";
+				group_stmt += "C.calam_id  ";
+			}
+			if(rd_2.isSelected())
+			{
+			
+				select_stmt += "C.loc_id, ";
+				if(!group_stmt.endsWith("GROUP BY "))
+					group_stmt += " , C.loc_id ";
+				else
+					group_stmt += "C.loc_id ";
+				
+			}
+			if(rd_3.isSelected())
+			{
+				select_stmt += "L.area_id, ";
+				from_stmt += "INNER JOIN location L ON L.loc_id = C.loc_id ";
+				if(!group_stmt.endsWith("GROUP BY "))
+					group_stmt += ",L.area_id ";
+				else
+					group_stmt += "L.area_id ";
+			}
+			select_stmt += " AVG(C.avg_calam_freq) AS \"AveFreq\"," +
+					"SUM(C.count_calam_aid) AS \"#ofAidedHH\", SUM(C.count_prepared) AS \"#ofPrepHH\","
+					+ "SUM(C.count_household) AS \"#ofTotalHH\"";
+			
+			for(int i=0; i<conditions.size(); i++){
+				if(conditions.get(i).getColumn().equals("avg_calam_freq")
+						|| conditions.get(i).getColumn().equals("count_calam_aid")
+						|| conditions.get(i).getColumn().equals("count_prepared")
+						|| conditions.get(i).getColumn().equals("count_households")){
+					if(where_stmt.endsWith("WHERE "))
+						where_stmt += conditions.get(i).getQueryCondition()+" ";
+					else
+						where_stmt +="AND" + conditions.get(i).getQueryCondition()+" ";
+				}
+				else if(((ConditionPanel)conditions.get(i)).getColumn().equals("calam_id")){
+						calam_types.add(conditions.get(i).getCalamType());
+						calam_flag = true;
+				}
+			}
+			if(calam_flag){
+				//if(where_stmt.isEmpty())
+				//	where_stmt = "WHERE ";
+				if(calam_types.size()>0)
+				{
+					if(!where_stmt.equals("WHERE "))
+						where_stmt += " AND ";
+					where_stmt += " (calam_id = " +calam_types.get(0)+" ";
+					
+					if(calam_types.size()>1)
+					{
+						for(int x = 1; x < calam_types.size(); x++)
+						{
+							where_stmt += " OR calam_id = " +calam_types.get(x)+" ";
+						}
+					
+					}
+					where_stmt += ") ";
+			
+				}
+			}
+			
+			query.append(select_stmt);
+			query.append(from_stmt);
+			query.append(additional_join_cond);
+			if(!where_stmt.endsWith("WHERE "))
+				query.append(where_stmt);
+			if(!group_stmt.endsWith("GROUP BY "))
+				query.append(group_stmt);
+			
+			System.out.println(query.toString());
+			table.setModel(tfmsd.getResultTable(query.toString()));
+		}
+	}
+	
+	public void updateConditionColumns(){
+		
+		if(rd_2.isSelected() && !columns.contains("loc_id")){
+			columns.add("loc_id");
+		}
+		else if(!rd_2.isSelected()){
+			columns.remove("loc_id");
+		}
+		
+		if(rd_1.isSelected() && !columns.contains("calam_id")){
+			columns.add("calam_id");
+		}
+		else if(!rd_1.isSelected()){
+			columns.remove("calam_id");
+		}
+		
+		if(rd_3.isSelected() && !columns.contains("area_id")){
+			columns.add("area_id");
+		}
+		else if(!rd_3.isSelected()){
+			columns.remove("area_id");
+		}
+		
+		conditions.clear();
+		conditionTable.setModel(new ConditionTableModel(conditions));
+		conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
+		conditionTable.setRowHeight(35);
 	}
 	
 	public void removePanel(ConditionPanel object){

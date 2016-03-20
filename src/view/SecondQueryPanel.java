@@ -172,7 +172,7 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 			conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 			conditionTable.setRowHeight(35);
 		}
-		else if(e.getSource() == rd_1 || e.getSource() == rd_2){
+		else if(e.getSource() == rd_2){
 			updateConditionColumns();
 		}
 		else if(e.getSource() == query_btn){
