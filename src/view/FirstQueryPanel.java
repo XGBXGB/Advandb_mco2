@@ -17,6 +17,8 @@ import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import model.TableFromMySqlDatabase;
+
 public class FirstQueryPanel extends JPanel implements ConditionParent, ActionListener{
 	private JLabel rollUpDrillDown_lbl, sliceNdice_lbl, table_lbl;
 	private JCheckBox rd_1, rd_2, rd_3, rd_4;
@@ -28,11 +30,13 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 	private JScrollPane tableSp, conditionSp;
 	private JButton condition_btn, query_btn;
 	private TitledBorder rollUpDrillDown_border;
+	private TableFromMySqlDatabase tfmsd;
 	private TitledBorder sliceNdice_border;
 	private ArrayList<ConditionPanel> conditions;
 	private JTable conditionTable;
 	
 	public FirstQueryPanel(){
+		tfmsd = new TableFromMySqlDatabase();
 		conditions = new ArrayList();
 		UIManager.put("nimbusBase", new Color(0, 153, 204));
         UIManager.put("control", new Color(204, 255, 204));
@@ -159,6 +163,9 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 			conditionTable.setModel(new ConditionTableModel(conditions));
 			conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 			conditionTable.setRowHeight(35);
+		}
+		else if(e.getSource() == query_btn){
+			table.setModel(tfmsd.getResultTable("QUERY GOES HERE"));
 		}
 	}
 	
