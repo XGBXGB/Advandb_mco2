@@ -7,6 +7,8 @@
 package view;
 
 import java.util.ArrayList;
+
+import javax.swing.JPanel;
 import javax.swing.table.AbstractTableModel;
 
 /**

@@ -189,6 +189,8 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 			String additional_join_cond = "";
 			String group_stmt = "GROUP BY ";
 			String where_stmt = "";
+			String kit_types = "";
+			boolean kit_flag = false;
 			if(rd_1.isSelected()){
 				select_stmt += "loc_id, ";
 				group_stmt += "loc_id ";
@@ -210,9 +212,13 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 					else
 						where_stmt +="AND" + conditions.get(i).getQueryCondition()+" ";
 				}
-				else if(conditions.get(i).getColumn().equals("kit_type")){
-					additional_join_cond += " AND " + conditions.get(i).getQueryCondition();
+				else if(((ConditionPanel)conditions.get(i)).getColumn().equals("kit_type")){
+						kit_types +=  "'"+conditions.get(i).getKitType()+"',";
+						kit_flag = true;
 				}
+			}
+			if(kit_flag){
+				additional_join_cond = " AND kit_type IN ("+kit_types.substring(0, kit_types.length()-1)+") ";
 			}
 			query.append(select_stmt);
 			query.append(from_stmt);
