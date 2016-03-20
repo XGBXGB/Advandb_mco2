@@ -5,11 +5,12 @@ import javax.swing.JTabbedPane;
 
 public class MainView extends JFrame{
 	private JTabbedPane tabbedPane;
-	private FirstQueryPanel queryOne, queryTwo;
+	private FirstQueryPanel queryOne;
+	private SecondQueryPanel queryTwo;
 	
 	public MainView(){
 		queryOne = new FirstQueryPanel();
-		queryTwo = new FirstQueryPanel();
+		queryTwo = new SecondQueryPanel();
 		tabbedPane = new JTabbedPane();
 		tabbedPane.add("Query 1", queryOne);
 		tabbedPane.add("Query 2", queryTwo);
