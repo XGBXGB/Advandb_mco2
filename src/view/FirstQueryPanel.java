@@ -36,13 +36,19 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 	private ArrayList<ConditionPanel> conditions;
 	private JTable conditionTable;
 	private ArrayList<String> columns;
+	private ArrayList<String> groups;
+	
 	
 	public FirstQueryPanel(){
+		
+		groups = new ArrayList();
+		
 		columns = new ArrayList();
 		columns.add("avg_calam_freq");
 		columns.add("count_calam_aid");
 		columns.add("count_prepared");
-		columns.add("count_households");
+		columns.add("count_exphousehold");
+		columns.add("count_household");
 		tfmsd = new TableFromMySqlDatabase();
 		conditions = new ArrayList();
 		UIManager.put("nimbusBase", new Color(0, 153, 204));
@@ -177,14 +183,49 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 		else if(e.getSource() == rd_1)
 		{
 			updateConditionColumns();
+			
+			if(rd_1.isSelected())
+			{
+				if(!groups.contains("One"))
+					groups.add("One");
+				
+			}
+			else
+			{
+				if(groups.contains("One"))
+					groups.remove("One");
+			}
 		}
 		else if(e.getSource() == rd_2)
 		{
 			updateConditionColumns();
+			
+			if(rd_2.isSelected())
+			{
+				if(!groups.contains("Two"))
+					groups.add("Two");
+				
+			}
+			else
+			{
+				if(groups.contains("Two"))
+					groups.remove("Two");
+			}
 		}
 		else if(e.getSource() == rd_3)
 		{
 			updateConditionColumns();
+			if(rd_3.isSelected())
+			{
+				if(!groups.contains("Three"))
+					groups.add("Three");
+				
+			}
+			else
+			{
+				if(groups.contains("Three"))
+					groups.remove("Three");
+			}
 		}
 		else if(e.getSource() == query_btn){
 			
@@ -194,13 +235,53 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 			String additional_join_cond = "";
 			String group_stmt = "GROUP BY ";
 			String where_stmt = "WHERE ";
-			ArrayList<Integer> calam_types = new ArrayList<Integer>();
+			ArrayList<String> calam_types = new ArrayList<String>();
+			ArrayList<String> areas = new ArrayList<String>();
 			boolean calam_flag = false;
 			boolean area_flag = false;
-			if(rd_1.isSelected())
+			
+			for(int x = 0; x < groups.size(); x++)
 			{
-				select_stmt += "C.calam_id, ";
-				group_stmt += "C.calam_id  ";
+				if(groups.get(x).equals("One"))
+				{
+					select_stmt += "CT.calamity_type, ";
+					from_stmt += "INNER JOIN calamitytypes CT ON C.calam_id = CT.calamity_type_id ";
+					if(!group_stmt.endsWith("GROUP BY "))
+						group_stmt += " , C.calam_id ";
+					else
+						group_stmt += "C.calam_id ";
+				}
+				else if(groups.get(x).equals("Two"))
+				{
+					select_stmt += "C.loc_id, ";
+					from_stmt += "INNER JOIN location L ON C.loc_id = L.loc_id ";
+					if(!group_stmt.endsWith("GROUP BY "))
+						group_stmt += " , C.loc_id ";
+					else
+						group_stmt += "C.loc_id ";
+
+				}
+				else if(groups.get(x).equals("Three"))
+				{
+					select_stmt += "L.area_id, ";
+					from_stmt += "INNER JOIN location L ON L.loc_id = C.loc_id ";
+					from_stmt += "INNER JOIN Area A ON L.area_id = A.area_id ";
+					if(!group_stmt.endsWith("GROUP BY "))
+						group_stmt += ",L.area_id ";
+					else
+						group_stmt += "L.area_id ";
+				}
+			}
+			
+			/*if(rd_3.isSelected())
+			{
+				select_stmt += "L.area_id, ";
+				from_stmt += "INNER JOIN location L ON L.loc_id = C.loc_id ";
+				from_stmt += "INNER JOIN Area A ON L.area_id = A.area_id ";
+				if(!group_stmt.endsWith("GROUP BY "))
+					group_stmt += ",L.area_id ";
+				else
+					group_stmt += "L.area_id ";
 			}
 			if(rd_2.isSelected())
 			{
@@ -212,32 +293,45 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 					group_stmt += "C.loc_id ";
 				
 			}
-			if(rd_3.isSelected())
+			if(rd_1.isSelected())
 			{
-				select_stmt += "L.area_id, ";
-				from_stmt += "INNER JOIN location L ON L.loc_id = C.loc_id ";
+				//select_stmt += "C.calam_id, ";
+				//group_stmt += "C.calam_id  ";
+				select_stmt += "CT.calamity_type, ";
+				from_stmt += "INNER JOIN calamitytypes CT ON C.calam_id = CT.calamity_type_id ";
 				if(!group_stmt.endsWith("GROUP BY "))
-					group_stmt += ",L.area_id ";
+					group_stmt += " , C.calam_id ";
 				else
-					group_stmt += "L.area_id ";
-			}
+					group_stmt += "C.calam_id ";
+			}*/
+			
 			select_stmt += " AVG(C.avg_calam_freq) AS \"AveFreq\"," +
 					"SUM(C.count_calam_aid) AS \"#ofAidedHH\", SUM(C.count_prepared) AS \"#ofPrepHH\","
-					+ "SUM(C.count_household) AS \"#ofTotalHH\"";
+					+ "SUM(C.count_exphousehold) AS\"#ofExperiencedHH\", SUM(C.count_household) AS \"#ofTotalHH\"";
 			
 			for(int i=0; i<conditions.size(); i++){
 				if(conditions.get(i).getColumn().equals("avg_calam_freq")
 						|| conditions.get(i).getColumn().equals("count_calam_aid")
 						|| conditions.get(i).getColumn().equals("count_prepared")
-						|| conditions.get(i).getColumn().equals("count_households")){
+						|| conditions.get(i).getColumn().equals("count_exphousehold")
+						|| conditions.get(i).getColumn().equals("count_household")
+						|| conditions.get(i).getColumn().equals("mun")
+						|| conditions.get(i).getColumn().equals("zone")
+						|| conditions.get(i).getColumn().equals("brgy")
+						|| conditions.get(i).getColumn().equals("purok")
+						){
 					if(where_stmt.endsWith("WHERE "))
 						where_stmt += conditions.get(i).getQueryCondition()+" ";
 					else
-						where_stmt +="AND" + conditions.get(i).getQueryCondition()+" ";
+						where_stmt +=" AND " + conditions.get(i).getQueryCondition()+" ";
 				}
-				else if(((ConditionPanel)conditions.get(i)).getColumn().equals("calam_id")){
+				else if(((ConditionPanel)conditions.get(i)).getColumn().equals("calamity type")){
 						calam_types.add(conditions.get(i).getCalamType());
 						calam_flag = true;
+				}
+				else if(((ConditionPanel)conditions.get(i)).getColumn().equals("area")){
+					areas.add(conditions.get(i).getAreas());
+					area_flag = true;
 				}
 			}
 			if(calam_flag){
@@ -247,13 +341,15 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 				{
 					if(!where_stmt.equals("WHERE "))
 						where_stmt += " AND ";
-					where_stmt += " (calam_id = " +calam_types.get(0)+" ";
+					/*where_stmt += " (calam_id = " + 1 +" ";*/
+					where_stmt += " (CT.calamity_type = \"" + calam_types.get(0) +"\" ";
 					
 					if(calam_types.size()>1)
 					{
 						for(int x = 1; x < calam_types.size(); x++)
 						{
-							where_stmt += " OR calam_id = " +calam_types.get(x)+" ";
+							/*where_stmt += " OR calam_id = " + (x+1) +" ";*/
+							where_stmt += " OR CT.calamity_type = \"" + calam_types.get(x) +"\" ";
 						}
 					
 					}
@@ -261,6 +357,31 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 			
 				}
 			}
+			
+			if(area_flag){
+				//if(where_stmt.isEmpty())
+				//	where_stmt = "WHERE ";
+				if(areas.size()>0)
+				{
+					if(!where_stmt.equals("WHERE "))
+						where_stmt += " AND ";
+					/*where_stmt += " (calam_id = " + 1 +" ";*/
+					where_stmt += " (A.area_name = \"" + areas.get(0) +"\" ";
+					
+					if(areas.size()>1)
+					{
+						for(int x = 1; x < areas.size(); x++)
+						{
+							/*where_stmt += " OR calam_id = " + (x+1) +" ";*/
+							where_stmt += " OR A.area_name = \"" + areas.get(x) +"\" ";
+						}
+					
+					}
+					where_stmt += ") ";
+			
+				}
+			}
+			
 			
 			query.append(select_stmt);
 			query.append(from_stmt);
@@ -279,23 +400,31 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 		
 		if(rd_2.isSelected() && !columns.contains("loc_id")){
 			columns.add("loc_id");
+			columns.add("mun");
+			columns.add("zone");
+			columns.add("brgy");
+			columns.add("purok");
 		}
 		else if(!rd_2.isSelected()){
 			columns.remove("loc_id");
+			columns.remove("mun");
+			columns.remove("zone");
+			columns.remove("brgy");
+			columns.remove("purok");
 		}
 		
-		if(rd_1.isSelected() && !columns.contains("calam_id")){
-			columns.add("calam_id");
+		if(rd_1.isSelected() && !columns.contains("calamity type")){
+			columns.add("calamity type");
 		}
 		else if(!rd_1.isSelected()){
-			columns.remove("calam_id");
+			columns.remove("calamity type");
 		}
 		
-		if(rd_3.isSelected() && !columns.contains("area_id")){
-			columns.add("area_id");
+		if(rd_3.isSelected() && !columns.contains("area")){
+			columns.add("area");
 		}
 		else if(!rd_3.isSelected()){
-			columns.remove("area_id");
+			columns.remove("area");
 		}
 		
 		conditions.clear();
