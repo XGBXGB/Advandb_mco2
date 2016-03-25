@@ -22,8 +22,8 @@ import model.TableFromMySqlDatabase;
 public class SecondQueryPanel extends JPanel implements ConditionParent, ActionListener{
 	private StringBuilder query;
 	private JLabel rollUpDrillDown_lbl, sliceNdice_lbl, table_lbl;
-	private JCheckBox rd_1, rd_2;
-	private JLabel rd_1_lbl, rd_2_lbl, query_desc;
+	private JCheckBox rd_1, rd_2, rd_3;
+	private JLabel rd_1_lbl, rd_2_lbl, rd_3_lbl, query_desc;
 	private JPanel rollUpDrillDown_panel, sliceNdice_panel;
 	private JTable table;
 	private JScrollPane tableSp, conditionSp;
@@ -76,8 +76,8 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 		query_desc = new JLabel("<html>Query description: <br>Lorem ipsum<hmtl>");
 		rd_1_lbl = new JLabel("loc_id");
 		rd_2_lbl = new JLabel("kit_type");
-		/*rd_3_lbl = new JLabel("Column3");
-		rd_4_lbl = new JLabel("Column4");
+		rd_3_lbl = new JLabel("area_id");
+		/*rd_4_lbl = new JLabel("Column4");
 		rd_5_lbl = new JLabel("Column5");
 		rd_6_lbl = new JLabel("Column6");
 		rd_7_lbl = new JLabel("Column7");
@@ -85,8 +85,8 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 		table_lbl = new JLabel("Table:");
 		rd_1 = new JCheckBox();
 		rd_2 = new JCheckBox();
-		/*rd_3 = new JCheckBox();
-		rd_4 = new JCheckBox();
+		rd_3 = new JCheckBox();
+		/*rd_4 = new JCheckBox();
 		rd_5 = new JCheckBox();
 		rd_6 = new JCheckBox();
 		rd_7 = new JCheckBox();
@@ -112,16 +112,16 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 		tableSp.setBounds(10,15, 600,330);
 		rd_1_lbl.setBounds(30, 35, 100, 15);
 		rd_2_lbl.setBounds(150, 35, 100, 15);
-		/*rd_3_lbl.setBounds(30, 65, 100, 15);
-		rd_4_lbl.setBounds(150, 65, 100, 15);
+		rd_3_lbl.setBounds(30, 65, 100, 15);
+		/*rd_4_lbl.setBounds(150, 65, 100, 15);
 		rd_5_lbl.setBounds(30, 95, 100, 15);
 		rd_6_lbl.setBounds(150, 95, 100, 15);
 		rd_7_lbl.setBounds(30, 125, 100, 15);
 		rd_8_lbl.setBounds(150, 125, 100, 15);*/
 		rd_1.setBounds(10, 35, 20, 15);
 		rd_2.setBounds(130, 35, 20, 15);
-		/*rd_3.setBounds(10, 65, 20, 15);
-		rd_4.setBounds(130, 65, 20, 15);
+		rd_3.setBounds(10, 65, 20, 15);
+		/*rd_4.setBounds(130, 65, 20, 15);
 		rd_5.setBounds(10, 95, 20, 15);
 		rd_6.setBounds(130, 95, 20, 15);
 		rd_7.setBounds(10, 125, 20, 15);
@@ -140,22 +140,22 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 		query_btn.addActionListener(this);
 		rd_1.addActionListener(this);
 		rd_2.addActionListener(this);
-		
+		rd_3.addActionListener(this);
 		
 		rollUpDrillDown_panel.setLayout(null);
 		sliceNdice_panel.setLayout(null);
 		rollUpDrillDown_panel.add(rd_1);
 		rollUpDrillDown_panel.add(rd_2);
-		/*rollUpDrillDown_panel.add(rd_3);
-		rollUpDrillDown_panel.add(rd_4);
+		rollUpDrillDown_panel.add(rd_3);
+		/*rollUpDrillDown_panel.add(rd_4);
 		rollUpDrillDown_panel.add(rd_5);
 		rollUpDrillDown_panel.add(rd_6);
 		rollUpDrillDown_panel.add(rd_7);
 		rollUpDrillDown_panel.add(rd_8);*/
 		rollUpDrillDown_panel.add(rd_1_lbl);
 		rollUpDrillDown_panel.add(rd_2_lbl);
-		/*rollUpDrillDown_panel.add(rd_3_lbl);
-		rollUpDrillDown_panel.add(rd_4_lbl);
+		rollUpDrillDown_panel.add(rd_3_lbl);
+		/*rollUpDrillDown_panel.add(rd_4_lbl);
 		rollUpDrillDown_panel.add(rd_5_lbl);
 		rollUpDrillDown_panel.add(rd_6_lbl);
 		rollUpDrillDown_panel.add(rd_7_lbl);
@@ -181,7 +181,7 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 			conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 			conditionTable.setRowHeight(35);
 		}
-		else if(e.getSource() == rd_1 || e.getSource() == rd_2){
+		else if(e.getSource() == rd_1 || e.getSource() == rd_2 || e.getSource() == rd_3){
 			if(e.getSource() == rd_2){
 				if(rd_2.isSelected()){
 					select_stmt.add("K.kit_type");
@@ -196,11 +196,22 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 			}
 			else if(e.getSource() == rd_1){
 				if(rd_1.isSelected()){
-					select_stmt.add("loc_id");
-					group_stmt.add("loc_id");
+					select_stmt.add("LK.loc_id");
+					group_stmt.add("LK.loc_id");
 				}else{
-					select_stmt.remove("loc_id");
-					group_stmt.remove("loc_id");
+					select_stmt.remove("LK.loc_id");
+					group_stmt.remove("LK.loc_id");
+				}
+			}
+			else if(e.getSource() == rd_3){
+				if(rd_3.isSelected()){
+					select_stmt.add("area_id");
+					from_stmt.add("INNER JOIN location L ON LK.loc_id = L.loc_id");
+					group_stmt.add("area_id");
+				}else{
+					select_stmt.remove("area_id");
+					from_stmt.remove("INNER JOIN location L ON LK.loc_id = L.loc_id");
+					group_stmt.remove("area_id");
 				}
 			}
 		}
@@ -234,7 +245,7 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 			for(int i=0; i< from_stmt.size(); i++){
 				query.append(from_stmt.get(i));
 				if(i+1 != from_stmt.size())
-					query.append(", ");
+					query.append(" ");
 				else
 					query.append(" ");
 			}
