@@ -35,9 +35,18 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 	private JTable conditionTable;
 	private ArrayList<String> columns;
 
+	private ArrayList<String> select_stmt = new ArrayList();
+	private ArrayList<String> from_stmt = new ArrayList();
+	private ArrayList<String> group_stmt = new ArrayList();
+	private String additional_join_cond = "";
+	private String where_stmt = "";
+	private String kit_types = "";
+	private boolean kit_flag = false;
 
 	
 	public SecondQueryPanel(){
+		
+		
 		columns = new ArrayList();
 		columns.add("expiry");
 		query = new StringBuilder();
@@ -172,8 +181,28 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 			conditionTable.getColumnModel().getColumn(0).setPreferredWidth(370);
 			conditionTable.setRowHeight(35);
 		}
-		else if(e.getSource() == rd_2){
-			updateConditionColumns();
+		else if(e.getSource() == rd_1 || e.getSource() == rd_2){
+			if(e.getSource() == rd_2){
+				if(rd_2.isSelected()){
+					select_stmt.add("K.kit_type");
+					from_stmt.add("INNER JOIN kittypes K ON LK.kit_id = K.kit_type_id");
+					group_stmt.add("K.kit_type");
+				}else{
+					select_stmt.remove("K.kit_type");
+					from_stmt.remove("INNER JOIN kittypes K ON LK.kit_id = K.kit_type_id");
+					group_stmt.remove("K.kit_type");
+				}
+				updateConditionColumns();
+			}
+			else if(e.getSource() == rd_1){
+				if(rd_1.isSelected()){
+					select_stmt.add("loc_id");
+					group_stmt.add("loc_id");
+				}else{
+					select_stmt.remove("loc_id");
+					group_stmt.remove("loc_id");
+				}
+			}
 		}
 		else if(e.getSource() == query_btn){
 			/*
@@ -182,28 +211,33 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 			INNER JOIN kittypes K
 			ON LK.kit_id = K.kit_type_id
 			GROUP BY loc_id, K.kit_type;
-		 */
+			 */
+			additional_join_cond = "";
+			where_stmt = "";
+			kit_types = "";
+			kit_flag = false;
+			
 			query = new StringBuilder();
-			String select_stmt = "SELECT ";
-			String from_stmt = "FROM loc_households_kit LK ";
-			String additional_join_cond = "";
-			String group_stmt = "GROUP BY ";
-			String where_stmt = "";
-			String kit_types = "";
-			boolean kit_flag = false;
-			if(rd_1.isSelected()){
-				select_stmt += "loc_id, ";
-				group_stmt += "loc_id ";
-			}
-			if(rd_2.isSelected()){
-				select_stmt += "K.kit_type, ";
-				from_stmt += "INNER JOIN kittypes K ON LK.kit_id = K.kit_type_id ";
-				if(!group_stmt.endsWith("GROUP BY "))
-					group_stmt += ",K.kit_type ";
+			select_stmt.add("AVG(expiry)");
+			select_stmt.add("COUNT(household_id)");
+			
+			query.append("SELECT ");
+			for(int i=0; i< select_stmt.size(); i++){
+				query.append(select_stmt.get(i));
+				if(i+1 != select_stmt.size())
+					query.append(", ");
 				else
-					group_stmt += "K.kit_type ";
+					query.append(" ");
 			}
-			select_stmt += "AVG(expiry), COUNT(household_id) ";
+			
+			query.append("FROM loc_households_kit LK ");
+			for(int i=0; i< from_stmt.size(); i++){
+				query.append(from_stmt.get(i));
+				if(i+1 != from_stmt.size())
+					query.append(", ");
+				else
+					query.append(" ");
+			}
 			
 			for(int i=0; i<conditions.size(); i++){
 				if(conditions.get(i).getColumn().equals("expiry")){
@@ -220,16 +254,24 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 			if(kit_flag){
 				additional_join_cond = " AND kit_type IN ("+kit_types.substring(0, kit_types.length()-1)+") ";
 			}
-			query.append(select_stmt);
-			query.append(from_stmt);
 			query.append(additional_join_cond);
 			query.append(where_stmt);
-			if(!group_stmt.endsWith("GROUP BY "))
-				query.append(group_stmt);
+			if(group_stmt.size()!=0){
+				query.append("GROUP BY ");
+				for(int i=0; i< group_stmt.size(); i++){
+					query.append(group_stmt.get(i));
+					if(i+1 != group_stmt.size())
+						query.append(", ");
+					else
+						query.append(" ");
+				}
+			}
 			
 			
 			System.out.println(query.toString());
 			table.setModel(tfmsd.getResultTable(query.toString()));
+			select_stmt.remove("AVG(expiry)");
+			select_stmt.remove("COUNT(household_id)");
 			
 		}
 	}
