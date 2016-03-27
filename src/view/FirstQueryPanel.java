@@ -254,7 +254,10 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 				else if(groups.get(x).equals("Two"))
 				{
 					select_stmt += "C.loc_id, ";
-					from_stmt += "INNER JOIN location L ON C.loc_id = L.loc_id ";
+					if(groups.contains("Three") && (groups.indexOf("Two") < groups.indexOf("Three")))
+						from_stmt += "INNER JOIN location L ON C.loc_id = L.loc_id ";
+					else if(!groups.contains("Three"))
+						from_stmt += "INNER JOIN location L ON C.loc_id = L.loc_id ";
 					if(!group_stmt.endsWith("GROUP BY "))
 						group_stmt += " , C.loc_id ";
 					else
@@ -263,8 +266,14 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 				}
 				else if(groups.get(x).equals("Three"))
 				{
-					select_stmt += "L.area_id, ";
-					from_stmt += "INNER JOIN location L ON L.loc_id = C.loc_id ";
+					int index1 = 0, index2 = 0;
+					
+					select_stmt += "L.area_id, ";					
+					
+					if(groups.contains("Two") && (groups.indexOf("Two") > groups.indexOf("Three")))
+						from_stmt += "INNER JOIN location L ON L.loc_id = C.loc_id ";
+					else if(!groups.contains("Two"))
+						from_stmt += "INNER JOIN location L ON C.loc_id = L.loc_id ";
 					from_stmt += "INNER JOIN Area A ON L.area_id = A.area_id ";
 					if(!group_stmt.endsWith("GROUP BY "))
 						group_stmt += ",L.area_id ";
