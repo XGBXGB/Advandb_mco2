@@ -21,7 +21,7 @@ import model.TableFromMySqlDatabase;
 
 public class FirstQueryPanel extends JPanel implements ConditionParent, ActionListener{
 	private StringBuilder query;
-	private JLabel rollUpDrillDown_lbl, sliceNdice_lbl, table_lbl;
+	private JLabel rollUpDrillDown_lbl, sliceNdice_lbl, table_lbl, query_desc;
 	private JCheckBox rd_1, rd_2, rd_3, rd_4;
 	private JCheckBox rd_5, rd_6, rd_7, rd_8;
 	private JLabel rd_1_lbl, rd_2_lbl, rd_3_lbl, rd_4_lbl;
@@ -81,6 +81,7 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 		rd_7_lbl = new JLabel("Column7");
 		rd_8_lbl = new JLabel("Column8");
 		table_lbl = new JLabel("Table:");
+		query_desc = new JLabel("<html>Query Description:<br>Record of <br>Calamities that Ensued <br>in Each Location of Palawan<br>and Marinduque</html>");
 		rd_1 = new JCheckBox();
 		rd_2 = new JCheckBox();
 		rd_3 = new JCheckBox();
@@ -103,6 +104,7 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
         sliceNdice_panel.setBounds(10, 370, 600,200);
         condition_btn.setBounds(420, 26, 150,80);
         query_btn.setBounds(650,130,200,80);
+		query_desc.setBounds(650, 0, 200, 130);
 		rollUpDrillDown_panel.setBounds(620, 370, 250, 200);
 		conditionSp.setBounds(30,26,376, 160);
 		table_lbl.setBounds(270,0,150,20);
@@ -110,9 +112,9 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 		rd_1_lbl.setBounds(30, 35, 100, 15);
 		rd_1_lbl.setText("calamity type");
 		rd_2_lbl.setBounds(150, 35, 100, 15);
-		rd_2_lbl.setText("location id");
+		rd_2_lbl.setText("location");
 		rd_3_lbl.setBounds(30, 65, 100, 15);
-		rd_3_lbl.setText("area id");
+		rd_3_lbl.setText("area");
 /*		rd_4_lbl.setBounds(150, 65, 100, 15);
 		rd_5_lbl.setBounds(30, 95, 100, 15);
 		rd_6_lbl.setBounds(150, 95, 100, 15);
@@ -167,6 +169,7 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 		this.add(table_lbl);
 		this.add(tableSp);
 		this.add(rollUpDrillDown_panel);
+		this.add(query_desc);
 		this.setLayout(null);
 		this.setBackground(new Color(204, 255, 204));
 		setVisible(true);

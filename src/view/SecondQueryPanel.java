@@ -73,10 +73,10 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 		sliceNdice_panel = new JPanel();
 		condition_btn = new JButton("Add Condition");
 		query_btn = new JButton("Execute");
-		query_desc = new JLabel("<html>Query description: <br>Lorem ipsum<hmtl>");
-		rd_1_lbl = new JLabel("loc_id");
-		rd_2_lbl = new JLabel("kit_type");
-		rd_3_lbl = new JLabel("area_name");
+		query_desc = new JLabel("<html>Query Description:<br>Record of<br>Disaster Preparedness Kits <br>each Household in Palawan<br>and Marinduque Possess</html>");
+		rd_1_lbl = new JLabel("location");
+		rd_2_lbl = new JLabel("kit type");
+		rd_3_lbl = new JLabel("area");
 		/*rd_4_lbl = new JLabel("Column4");
 		rd_5_lbl = new JLabel("Column5");
 		rd_6_lbl = new JLabel("Column6");
@@ -107,7 +107,7 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
         query_btn.setBounds(650,130,200,80);
 		rollUpDrillDown_panel.setBounds(620, 370, 250, 200);
 		conditionSp.setBounds(30,26,376, 160);
-		query_desc.setBounds(650, 0, 100,100);
+		query_desc.setBounds(650, 0, 200, 130);
 		table_lbl.setBounds(270,0,150,20);
 		tableSp.setBounds(10,15, 600,330);
 		rd_1_lbl.setBounds(30, 35, 100, 15);
