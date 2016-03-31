@@ -268,7 +268,7 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 				{
 					int index1 = 0, index2 = 0;
 					
-					select_stmt += "L.area_id, ";					
+					select_stmt += "A.area_name, ";					
 					
 					if(groups.contains("Two") && (groups.indexOf("Two") > groups.indexOf("Three")))
 						from_stmt += "INNER JOIN location L ON L.loc_id = C.loc_id ";
@@ -341,6 +341,12 @@ public class FirstQueryPanel extends JPanel implements ConditionParent, ActionLi
 				else if(((ConditionPanel)conditions.get(i)).getColumn().equals("area")){
 					areas.add(conditions.get(i).getAreas());
 					area_flag = true;
+				}
+				else if(((ConditionPanel)conditions.get(i)).getColumn().equals("loc_id")){
+					if(where_stmt.endsWith("WHERE "))
+						where_stmt += "L."+conditions.get(i).getQueryCondition()+" ";
+					else
+						where_stmt +=" AND " + "L." + conditions.get(i).getQueryCondition()+" ";
 				}
 			}
 			if(calam_flag){

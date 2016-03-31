@@ -76,7 +76,7 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 		query_desc = new JLabel("<html>Query description: <br>Lorem ipsum<hmtl>");
 		rd_1_lbl = new JLabel("loc_id");
 		rd_2_lbl = new JLabel("kit_type");
-		rd_3_lbl = new JLabel("area_id");
+		rd_3_lbl = new JLabel("area_name");
 		/*rd_4_lbl = new JLabel("Column4");
 		rd_5_lbl = new JLabel("Column5");
 		rd_6_lbl = new JLabel("Column6");
@@ -192,27 +192,37 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 					from_stmt.remove("INNER JOIN kittypes K ON LK.kit_id = K.kit_type_id");
 					group_stmt.remove("K.kit_type");
 				}
-				updateConditionColumns();
+				updateConditionColumns(2);
 			}
 			else if(e.getSource() == rd_1){
 				if(rd_1.isSelected()){
 					select_stmt.add("LK.loc_id");
 					group_stmt.add("LK.loc_id");
+					if(!from_stmt.contains("INNER JOIN location L ON LK.loc_id = L.loc_id"))
+						from_stmt.add("INNER JOIN location L ON LK.loc_id = L.loc_id");
 				}else{
 					select_stmt.remove("LK.loc_id");
 					group_stmt.remove("LK.loc_id");
+					if(!group_stmt.contains("area_name"))
+						from_stmt.remove("INNER JOIN location L ON LK.loc_id = L.loc_id");
 				}
+				updateConditionColumns(1);
 			}
 			else if(e.getSource() == rd_3){
 				if(rd_3.isSelected()){
-					select_stmt.add("area_id");
-					from_stmt.add("INNER JOIN location L ON LK.loc_id = L.loc_id");
-					group_stmt.add("area_id");
+					select_stmt.add("area_name");
+					if(!from_stmt.contains("INNER JOIN location L ON LK.loc_id = L.loc_id"))
+						from_stmt.add("INNER JOIN location L ON LK.loc_id = L.loc_id");
+					from_stmt.add("INNER JOIN area A ON L.area_id = A.area_id");
+					group_stmt.add("area_name");
 				}else{
-					select_stmt.remove("area_id");
-					from_stmt.remove("INNER JOIN location L ON LK.loc_id = L.loc_id");
-					group_stmt.remove("area_id");
+					select_stmt.remove("area_name");
+					from_stmt.remove("INNER JOIN area A ON L.area_id = A.area_id");
+					group_stmt.remove("area_name");
+					if(!group_stmt.contains("LK.loc_id"))
+						from_stmt.remove("INNER JOIN location L ON LK.loc_id = L.loc_id");
 				}
+				updateConditionColumns(3);
 			}
 		}
 		else if(e.getSource() == query_btn){
@@ -255,17 +265,31 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 					if(where_stmt.isEmpty())
 						where_stmt = "WHERE " + conditions.get(i).getQueryCondition()+" ";
 					else
-						where_stmt +="AND" + conditions.get(i).getQueryCondition()+" ";
+						where_stmt +="AND " + conditions.get(i).getQueryCondition()+" ";
 				}
 				else if(((ConditionPanel)conditions.get(i)).getColumn().equals("kit_type")){
 						kit_types +=  "'"+conditions.get(i).getKitType()+"',";
 						kit_flag = true;
+				}else if(conditions.get(i).getColumn().equals("area")){
+					if(where_stmt.isEmpty())
+						where_stmt = "WHERE area_name = '"+conditions.get(i).getAreas()+"' ";
+					else
+						where_stmt +="AND area_name = '"+conditions.get(i).getAreas()+"' ";
+				}else{
+					if(where_stmt.isEmpty())
+						where_stmt = "WHERE " + conditions.get(i).getQueryCondition()+" ";
+					else
+						where_stmt +="AND " + conditions.get(i).getQueryCondition()+" ";
 				}
 			}
+			
 			if(kit_flag){
-				additional_join_cond = " AND kit_type IN ("+kit_types.substring(0, kit_types.length()-1)+") ";
+				if(where_stmt.isEmpty())
+					where_stmt = "WHERE " + "kit_type IN ("+kit_types.substring(0, kit_types.length()-1)+") ";
+				else
+					where_stmt +="AND " + "kit_type IN ("+kit_types.substring(0, kit_types.length()-1)+") ";
 			}
-			query.append(additional_join_cond);
+		
 			query.append(where_stmt);
 			if(group_stmt.size()!=0){
 				query.append("GROUP BY ");
@@ -287,13 +311,38 @@ public class SecondQueryPanel extends JPanel implements ConditionParent, ActionL
 		}
 	}
 	
-	public void updateConditionColumns(){
-		
-		if(rd_2.isSelected() && !columns.contains("kit_type")){
-			columns.add("kit_type");
+	public void updateConditionColumns(int n){
+		if(n==2){
+			if(rd_2.isSelected() && !columns.contains("kit_type")){
+				columns.add("kit_type");
+			}
+			else if(!rd_2.isSelected()){
+				columns.remove("kit_type");
+			}
 		}
-		else if(!rd_2.isSelected()){
-			columns.remove("kit_type");
+		else if(n==1){
+			if(rd_1.isSelected() && !columns.contains("mun")){
+				columns.add("loc_id");
+				columns.add("mun");
+				columns.add("zone");
+				columns.add("purok");
+				columns.add("brgy");
+			}
+			else if(!rd_1.isSelected()){
+				columns.remove("loc_id");
+				columns.remove("mun");
+				columns.remove("zone");
+				columns.remove("purok");
+				columns.remove("brgy");
+			}
+		}
+		else if(n==3){
+			if(rd_3.isSelected() && !columns.contains("area_name")){
+				columns.add("area");
+			}
+			else if(!rd_3.isSelected()){
+				columns.remove("area");
+			}
 		}
 		
 		conditions.clear();
